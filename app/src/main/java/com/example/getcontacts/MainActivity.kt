@@ -1,5 +1,6 @@
 package com.example.getcontacts
 
+import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.content.pm.PackageManager
 import android.database.Cursor
@@ -24,29 +25,20 @@ class MainActivity : AppCompatActivity() {
 
         binding?.run {
 
-
-//            repeat(20) {
-//                data.add(
-//                    RvData(
-//                        name = "Name $it",
-//                        phone = "Phone $it",
-//                    )
-//                )
+//            btnGetContacts.setOnClickListener {
+//                getContacts()
 //            }
 
             rvContacts.adapter = MyRecyclerViewAdapter(
                 data = data,
                 onNameClick = {
                     Toast.makeText(this@MainActivity, it, Toast.LENGTH_SHORT).show()
-
                 },
                 onPhoneNumberClick = {
                     Toast.makeText(this@MainActivity, it, Toast.LENGTH_SHORT).show()
                 },
             )
             rvContacts.layoutManager = LinearLayoutManager(this@MainActivity)
-
-
         }
 
         val permissions = arrayOf(android.Manifest.permission.READ_CONTACTS)
@@ -66,22 +58,24 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == PERMISSION_CODE && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
             Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show()
-            getContacts()
+//            getContacts()
         } else {
             Toast.makeText(this, "Permission not granted", Toast.LENGTH_SHORT).show()
         }
     }
 
+    @SuppressLint("Range")
     fun getContacts() {
         val contentResolver: ContentResolver = getContentResolver()
         val uri: Uri? = ContactsContract.CommonDataKinds.Phone.CONTENT_URI
         val cursor: Cursor? = uri?.let { contentResolver.query(it, null, null, null, null) }
 
         if (cursor?.count!! > 0) {
-            while (cursor.moveToNext() == true) {
+            while (cursor.moveToNext()) {
                 data.add(
                     RvData(
-                        name = (cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_PRIMARY)))
+                        cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME_PRIMARY)),
+                        cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER))
                     )
                 )
             }
